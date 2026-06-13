@@ -1,292 +1,302 @@
-<img width="1122" height="652" alt="image" src="https://github.com/user-attachments/assets/a1f7199f-f5c5-469f-95e3-dcf97134b21f" />
+<img width="1282" height="792" alt="image" src="https://github.com/user-attachments/assets/7cef267a-259e-472e-bd29-abe2e44983d3" />
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://badgen.net/github/license/SD-ITLab/WinRep)
 
-# 🛠️ SD TechTools – Windows Repair Toolbox
+# 🛠️ SD TechTools - Windows Repair Toolbox
 
-**SD TechTools – Windows Repair Toolbox** ist ein internes Diagnose- und Reparaturtool für Windows-Systeme,  
-entwickelt für den **Werkstatt- und Serviceeinsatz** bei **SD-ITLab**.
+**Version 5.0.0**
 
-Ab Version **4.0.0** wurde das ursprünglich rein PowerShell-basierte Tool vollständig auf eine **moderne Python-GUI** umgestellt.  
-Die eigentlichen Reparatur- und Diagnoseaktionen werden weiterhin zuverlässig über PowerShell ausgeführt.
+SD TechTools ist ein Diagnose-, Wartungs- und Reparaturtool für Windows-Systeme.  
+Es wurde für den Werkstatt- und Serviceeinsatz entwickelt und bündelt häufig benötigte Windows-Prüfungen in einer modernen Python-Oberfläche.
 
----
-
-## 📌 Beschreibung
-
-SD TechTools bündelt wichtige **Windows-Diagnose-, Reparatur- und Wartungsfunktionen** in einer übersichtlichen grafischen Oberfläche.
-
-Ziel ist es, häufige Windows-Probleme **schnell, nachvollziehbar und reproduzierbar** zu analysieren und zu beheben –  
-ohne manuelles Eintippen komplexer Befehle.
-
-**Typische Einsatzbereiche:**
-- PC- & Notebook-Reparatur
-- Systemprüfung nach Hardwaretausch
-- Windows-Fehlerdiagnose
-- Kunden-Check & Werkstatt-Dokumentation
+Die grafische Oberfläche läuft in Python, die eigentlichen Diagnose- und Reparaturaktionen werden über PowerShell und Windows-Bordmittel ausgeführt.
 
 ---
 
-## 🖥️ Benutzeroberfläche (GUI)
+## 📌 Überblick
 
-Die Anwendung verfügt über eine **moderne, aufgeräumte Oberfläche**, optimiert für den täglichen Werkstattbetrieb:
+SD TechTools hilft dabei, typische Windows-Probleme schnell und nachvollziehbar zu prüfen:
 
-- Kategorisierte Aktionen (links)
-- Zentrale Aktionsauswahl
-- **Live-Systemübersicht** (rechts)
-- Ausführliches Log-Fenster
-- Fortschrittsanzeige & Statusmeldungen
+- Windows-Komponentenspeicher und Systemdateien
+- Netzwerk, DNS, Proxy und Internetverbindung
+- Datenträgerzustand und Speicherplatz
+- Treiber- und Geräteprobleme
+- Sicherheitsstatus
+- Windows Update und installierte Updates
+- Akkuinformationen bei Notebooks
+- Drucker und Druckwarteschlangen
+- Zeit-/Zeitsynchronisierung
+- Autostart- und Dienstediagnose
+- kompakter Diagnosebericht für die Erstaufnahme
 
-**Angezeigte Systeminformationen u. a.:**
-- Windows-Version & Edition
-- Boot-Modus (UEFI / BIOS + GPT/MBR)
+Ziel ist eine schnelle, reproduzierbare Erstdiagnose ohne manuelles Zusammensuchen einzelner Befehle.
+
+---
+
+## 🖥️ Benutzeroberfläche
+
+Die Oberfläche ist für den täglichen Werkstattbetrieb aufgebaut:
+
+- Kategorien links
+- Aktionsliste in der Mitte
+- Live-Systemübersicht rechts
+- Logkonsole mit farbigen Statuszeilen
+- Fortschritts- und Statusanzeige
+- separater Button zum Erstellen eines Diagnoseberichts
+
+Die Live-Systemübersicht zeigt unter anderem:
+
+- Windows-Version und Edition
+- Boot-Modus inklusive GPT/MBR
+- SecureBoot / CA-2023-Status
+- Netzwerk-IP der primären LAN-/Internetroute
+- Systemlaufwerk C: inklusive Füllstandsbewertung
 - BitLocker-Status
-- Primäre Netzwerk-IP
-- Systemlaufwerk (Belegung)
 - CPU-Modell
+
+---
+
+## Diagnosebericht in Version 5.0.0
+
+Der Bericht wurde in Version 5.0.0 als kompakte Erstaufnahme neu aufgebaut.
+
+Der Button **Bericht erstellen** erzeugt eine TXT-Datei auf dem Desktop, zum Beispiel:
+
+```text
+SD-ITLab-TechTools-Bericht_20260613_021500.txt
+```
+
+Der Bericht enthält:
+
+- Datum und Computername
+- Windows-Version, Build und Aktivierungsstatus
+- Boot-Modus, SecureBoot, Schnellstart und DISM CheckHealth
+- Hardware: Hersteller/Modell, Mainboard, CPU, RAM, GPU/VRAM, BIOS
+- Datenträgerübersicht
+- Akkuinformationen, falls vorhanden
+- letzte Windows Updates, dedupliziert nach KB, maximal 10 Einträge
+- Gerätemanager-Probleme
+- Netzwerkdiagnose mit aktiven Adaptern, IP, Gateway, DNS, DNS-Test, HTTPS-Test und Proxy
+- Sicherheitsstatus mit Defender, Firewall, TPM, BitLocker, UAC und Remote Desktop
+- kritische System-/Anwendungsereignisse der letzten 14 Tage
+- kritische Einträge aus dem Zuverlässigkeitsverlauf der letzten 14 Tage
+- aktive Autostarteinträge
+- Dienstediagnose mit betroffenen Diensten und Service-Control-Manager-Fehlern
+- Abschlussbewertung
+
+---
+
+## 🛠️ Funktionen
+
+### 🧩 Systemdateien / DISM
+
+- Windows-Komponentenspeicher prüfen: `ScanHealth`
+- Prüfen, ob Windows als beschädigt markiert ist: `CheckHealth`
+- Reparatur des Komponentenstores: `RestoreHealth`
+- Komponentenstore bereinigen: `StartComponentCleanup`
+- Systemdateien prüfen und reparieren: `sfc /scannow`
+- Dateisystemprüfung von Laufwerk C:
+
+### Diagnose
+
+- Geräte- und Treiberprobleme prüfen
+- Speicherplatz aller Laufwerke prüfen
+- ausstehenden Neustart erkennen
+- Datenträgerzustand prüfen
+- Datenträgerereignisse auswerten
+- Netzwerkdiagnose
+- Windows-Update-Diagnose
+- kompakte Ereignisdiagnose
+- Sicherheitsstatus anzeigen
+- Bluescreen- und Absturzdateien finden
+- Autostartübersicht anzeigen
+- Dienstediagnose anzeigen
+- Druckerdiagnose anzeigen
+- Zeit- und Zeitzonendiagnose anzeigen
+
+### 🌐 Netzwerk
+
+- DNS-Cache leeren
+- Winsock zurücksetzen
+- TCP/IP-Stack zurücksetzen
+- IP erneuern
+- Proxy zurücksetzen
+- Firewall-Regeln auf Standard zurücksetzen
+
+### 🧹 Cleanup / Updates
+
+- Windows-Update-Komponenten zurücksetzen
+- temporäre Dateien bereinigen
+- Druckwarteschlange leeren und Spooler neu starten
+- Windows-Zeit neu synchronisieren
+
+### ⚡ Leistung / Tuning
+
+- Windows-Höchstleistungsmodus aktivieren (Feintuned)
+- Windows Home auf Windows Pro vorbereiten
+
+### 🔍 Info & Tools
+
+- ausführliche Systeminformationen
+- BitLocker-Status anzeigen / BitLocker auf C: deaktivieren
+- Akkuinformationen und Windows-Batteriereport
+- Drucker-Testseite auslösen
+- Diagnosebericht erstellen
+
+### SecureBoot CA 2023
+
+- SecureBoot / UEFI-CA-2023-Status prüfen
+- Windows-Update-Vorgang für CA-2023-Aktualisierung anstoßen
 
 ---
 
 ## 🚀 Verwendung
 
-1. **SD TechTools.exe** (oder das Python-Skript) **als Administrator** starten  
-2. Gewünschte Aktion aus der Liste auswählen  
-3. Auf **„Aktion ausführen“** klicken  
-4. Fortschritt & Ausgaben im Log verfolgen  
-5. Nach Abschluss erscheint eine klare Statusmeldung
+1. `SD TechTools.exe` oder das Python-Skript als Administrator starten.
+2. Kategorie und Aktion auswählen.
+3. Auf **Aktion ausführen** klicken.
+4. Ausgabe im Log verfolgen.
+5. Bei Bedarf über **Bericht erstellen** eine TXT-Erstanalyse erzeugen.
 
-> ⚠️ Einige Aktionen (z. B. DISM, SFC, BitLocker, CHKDSK) erfordern Administratorrechte.
-
----
-
-## 🛠️ Verfügbare Funktionen (Auszug)
-
-### 🧩 Systemdateien / DISM
-- Windows-Komponentenspeicher prüfen *(ScanHealth)*
-- Prüfen, ob Windows als beschädigt markiert ist *(CheckHealth)*
-- Automatische Reparaturvorgänge *(RestoreHealth)*
-- Abgelöste Startkomponenten bereinigen *(ComponentCleanup)*
-- Systemdateien prüfen & reparieren *(sfc /scannow)*
-- Dateisystemprüfung von Laufwerk C: *(chkdsk)*
-
-### 🌐 Netzwerk
-- Netzwerk-Reset (DNS, Winsock, TCP/IP)
-
-### 🧹 Cleanup / Updates
-- Windows Update zurücksetzen
-- Temporäre Dateien bereinigen
-
-### ⚡ Leistung / Tuning
-- Windows-Höchstleistungsmodus aktivieren
-- Upgrade von Windows Home auf Windows Pro
-
-### 🔍 Info & Tools
-- Ausführliche Systeminformationen
-- BitLocker-Status anzeigen / deaktivieren
-- **Akku-Zustand analysieren (Notebooks)**
+⚠️ Einige Aktionen benötigen Administratorrechte, zum Beispiel DISM, SFC, BitLocker, CHKDSK, Windows Update Reset und Spooler-Reparaturen.
 
 ---
 
-## 🔋 Akku-Zustand (ab Version 4.1.0)
+## Dateien
 
-Für Notebooks bietet SD TechTools eine **Akkuzustandsanalyse**:
+Wichtige Projektdateien:
 
-- Erstellung eines **Windows-Batteriereports**
-- Automatische Ablage auf dem **Desktop**
-- Anzeige einer **Kurzbewertung im Log**, inkl.:
-  - Designkapazität
-  - Aktuelle volle Ladekapazität
-  - Berechnete Akkugesundheit (%)
-  - Bewertung (z. B. „gut“, „kritisch – Akkutausch empfohlen“)
-  - Ladezyklen (falls vom Gerät unterstützt)
+```text
+techtools.py              Python-GUI
+techtools_actions.ps1     PowerShell-Aktionen
+README.md                 Projektdokumentation
+logo.png                  Logo für die Oberfläche
+icon.ico                  Windows-Icon
+```
 
-➡️ Ideal für **Kundenberatung & Kostenvoranschläge**.
+## Voraussetzungen
+
+- Windows 10 oder Windows 11
+- PowerShell 5.1
+- Administratorrechte für Reparaturfunktionen
+- Python nur beim Start aus dem Quellcode erforderlich
+
+Das Tool nutzt überwiegend Windows-Bordmittel:
+
+- DISM
+- SFC
+- CHKDSK
+- powercfg
+- w32tm
+- Get-CimInstance / Get-WinEvent
+- Windows Update COM API
+- NetTCPIP-PowerShell-Cmdlets
 
 ---
 
-## ℹ️ Hinweise
+## Hinweise
 
-✔ Das Tool nutzt **ausschließlich Windows-Bordmittel** (DISM, SFC, powercfg, PowerShell)  
-✔ Keine Installation erforderlich  
-✔ Geeignet für **Windows 10 & Windows 11**  
-✔ Desktop-PCs ohne Akku werden automatisch erkannt  
-✔ Für internen Werkstatt- und Serviceeinsatz optimiert  
+- Reparaturaktionen können Systemzustand, Netzwerk, Update-Komponenten oder Druckwarteschlangen verändern.
+- Die Aktion zum Leeren der Druckwarteschlange löscht offene Druckaufträge.
+- CHKDSK-Reparaturen können einen Neustart erfordern.
+- Der Diagnosebericht ist für die Erstaufnahme gedacht und ersetzt keine vollständige Fehleranalyse.
 
 ---
 
-## 📝 Versionshistorie
+## Versionshistorie
 
-### 🔹 Version 4.1.0
-- Erweiterte Akku-Diagnose
-- Automatischer Battery Report auf dem Desktop
-- Akkugesundheit & Bewertung im Log
+### Version 5.0.0
 
-### 🔹 Version 4.0.0
-- **Kompletter Umbau auf Python-GUI**
-- Modernisierte Oberfläche
-- Zentrale Systeminformationsanzeige
-- Saubere Trennung von GUI (Python) & Aktionen (PowerShell)
+- Umbenennung und Projektumbau von **WinRep** zu **TechTools**
+- Überarbeitung des Overlays und der Live-Systemübersicht
+- größere und besser lesbare Logkonsole
+- farbliche Statusbewertung für Betriebssystem, Boot-Modus, SecureBoot, Netzwerk, BitLocker und Systemlaufwerk
+- Einbindung der Prüfung für **SecureBoot CA 2023**
+- neue und erweiterte Diagnosefunktionen, unter anderem:
+  - Geräte- und Treiberprobleme
+  - Datenträgerzustand und Datenträgerereignisse
+  - Netzwerkdiagnose
+  - Windows-Update-Diagnose
+  - Sicherheitsstatus
+  - Autostartübersicht
+  - Dienstediagnose
+  - Druckerdiagnose
+  - Zeit- und Zeitzonendiagnose
+- neuer Bericht für die schnelle Erstaufnahme eines Systems
+- Bericht enthält unter anderem System, Hardware, Windows-Aktivierung, DISM CheckHealth, Schnellstart, SecureBoot, Netzwerk, Sicherheitsstatus, Updates, Treiberfehler, kritische Ereignisse, Autostart und Dienste
+- Bericht ohne dauerhafte Aktionshistorie, damit keine zusätzliche Protokolldatei auf Geräten zurückbleibt
+- RAM- und VRAM-Ausgabe im Bericht auf typische nominelle Größen verbessert
 
-### 🔹 Version 3.8.1
-- Erweiterung Netzwerk-Reset (inkl. Proxy-Reset)
-- Zusätzliche Systeminformationen
+### Version 4.1.0
 
-### 🔹 Version 3.6.x – 3.0.0
-- Stabilitäts- & Performance-Optimierungen
+- erweiterte Akku-Diagnose
+- automatischer Battery Report auf dem Desktop
+- Akkugesundheit und Bewertung im Log
+
+### Version 4.0.0
+
+- kompletter Umbau auf Python-GUI
+- modernisierte Oberfläche
+- zentrale Systeminformationsanzeige
+- Trennung von GUI in Python und Aktionen in PowerShell
+
+### Version 3.8.1
+
+- erweiterter Netzwerk-Reset inklusive Proxy-Reset
+- zusätzliche Systeminformationen
+
+### Version 3.6.x - 3.0.0
+
+- Stabilitäts- und Performance-Optimierungen
 - Erweiterung der Wiederherstellungsoptionen
 - Integration zusätzlicher Diagnosefunktionen
 
 ---
 
-## 📄 Lizenz
+## Lizenz
 
 MIT License  
-© 2026 **SD-ITLab**
+Copyright (c) 2026 SD-ITLab
 
-Dieses Tool wurde für den internen Einsatz entwickelt, kann aber frei angepasst und erweitert werden.
-
----
-# ENGLISH
-
-# 🛠️ SD TechTools – Windows Repair Toolbox
-
-**SD TechTools – Windows Repair Toolbox** is an internal Windows diagnostic and repair tool,  
-developed for **workshop and service environments** at **SD-ITLab**.
-
-Starting with version **4.0.0**, the tool was fully migrated from a pure PowerShell script to a **modern Python-based GUI**.  
-All repair and diagnostic actions are still executed reliably via PowerShell in the background.
+Dieses Tool wurde für den Werkstatt- und Serviceeinsatz entwickelt und kann frei angepasst und erweitert werden.
 
 ---
 
-## 📌 Description
+# English
 
-SD TechTools combines essential **Windows diagnostic, repair, and maintenance functions** in a clean and structured graphical interface.
+# SD TechTools - Windows Repair Toolbox
 
-The goal is to analyze and resolve common Windows issues **quickly, transparently, and reproducibly**,  
-without manually entering complex commands.
+**Version 5.0.0**
 
-**Typical use cases:**
-- PC & notebook repair
-- System checks after hardware replacement
-- Windows troubleshooting
-- Customer diagnostics & workshop documentation
+SD TechTools is a Windows diagnostics, maintenance and repair toolbox designed for workshop and service environments.
 
----
+The application uses a Python GUI while the diagnostic and repair actions are executed through PowerShell and native Windows tools.
 
-## 🖥️ Graphical User Interface (GUI)
+## Key Features
 
-The application features a **modern and workshop-optimized UI**, designed for daily service use:
+- modern graphical interface
+- live system overview
+- DISM, SFC and CHKDSK actions
+- network, update, security, printer and time diagnostics
+- disk, battery, driver and event checks
+- compact TXT diagnostic report for first analysis
+- critical event and reliability history summary
+- active startup entry and service diagnostics
 
-- Categorized actions (left panel)
-- Central action selection
-- **Live system overview** (right panel)
-- Detailed log output
-- Progress bar & status messages
+## Version 5.0.0 Highlights
 
-**Displayed system information includes:**
-- Windows version & edition
-- Boot mode (UEFI / BIOS + GPT/MBR)
-- BitLocker status
-- Primary network IP
-- System drive usage
-- CPU model
+- project renamed and reworked from WinRep to TechTools
+- refreshed overlay and live system overview
+- improved log console readability
+- SecureBoot CA 2023 check added
+- expanded diagnostics for drivers, disks, network, Windows Update, security, startup entries, services, printers and time synchronization
+- new first-analysis report for quick workshop intake
+- report includes system, hardware, Windows activation, DISM CheckHealth, Fast Startup, SecureBoot, network, security, updates, driver issues, critical events, startup entries and services
+- no persistent action history on customer systems
+- improved RAM and VRAM display
+- live overlay now prefers the LAN/default internet route over VPN addresses
 
----
-
-## 🚀 Usage
-
-1. Start **SD TechTools.exe** (or the Python script) **as Administrator**
-2. Select the desired action from the list
-3. Click **“Run action”**
-4. Follow progress and output in the log window
-5. A clear status message is shown when the task completes
-
-> ⚠️ Some actions (e.g. DISM, SFC, BitLocker, CHKDSK) require administrator privileges.
-
----
-
-## 🛠️ Available Features (Excerpt)
-
-### 🧩 System Files / DISM
-- Check Windows component store *(ScanHealth)*
-- Check if Windows is marked as corrupted *(CheckHealth)*
-- Automatic repair operations *(RestoreHealth)*
-- Clean up superseded components *(ComponentCleanup)*
-- Scan & repair system files *(sfc /scannow)*
-- Check file system on drive C: *(chkdsk)*
-
-### 🌐 Network
-- Network reset (DNS, Winsock, TCP/IP)
-
-### 🧹 Cleanup / Updates
-- Reset Windows Update components
-- Clean temporary files
-
-### ⚡ Performance / Tuning
-- Enable Windows High Performance power plan
-- Upgrade Windows Home to Windows Pro
-
-### 🔍 Info & Tools
-- Detailed system information
-- Display / disable BitLocker status
-- **Battery health analysis (notebooks)**
-
----
-
-## 🔋 Battery Health (since version 4.1.0)
-
-For notebooks, SD TechTools includes a **battery health analysis** feature:
-
-- Generates a **Windows battery report**
-- Automatically saves it to the **desktop**
-- Displays a **quick summary in the log**, including:
-  - Design capacity
-  - Full charge capacity
-  - Calculated battery health (%)
-  - Condition rating (e.g. *good*, *critical – battery replacement recommended*)
-  - Charge cycles (if supported by the device)
-
-➡️ Ideal for **customer consultation and service estimates**.
-
----
-
-## ℹ️ Notes
-
-✔ Uses **Windows built-in tools only** (DISM, SFC, powercfg, PowerShell)  
-✔ No installation required  
-✔ Compatible with **Windows 10 & Windows 11**  
-✔ Desktop PCs without batteries are detected automatically  
-✔ Optimized for internal workshop and service use  
-
----
-
-## 📝 Version History
-
-### 🔹 Version 4.1.0
-- Extended battery diagnostics
-- Automatic battery report saved to desktop
-- Battery health calculation & rating in log output
-
-### 🔹 Version 4.0.0
-- **Complete migration to Python GUI**
-- Modernized user interface
-- Central system information overview
-- Clean separation of GUI (Python) and actions (PowerShell)
-
-### 🔹 Version 3.8.1
-- Extended network reset (including proxy reset)
-- Additional system information
-
-### 🔹 Version 3.6.x – 3.0.0
-- Stability and performance improvements
-- Extended recovery options
-- Integration of additional diagnostic functions
-
----
-
-## 📄 License
+## License
 
 MIT License  
-© 2026 **SD-ITLab**
-
-This tool was developed for internal use but may be freely modified and extended.
+Copyright (c) 2026 SD-ITLa
