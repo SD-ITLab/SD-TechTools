@@ -645,25 +645,18 @@ Mainboard
     }
 
     # -------------------------------------------------------------------------
-    # 11: Performance / Höchstleistungsmodus + CPU/USB/Buttons-Optimierung
+    # 11: Ausbalanciert / Performance + CPU/USB/Buttons-Optimierung
     # -------------------------------------------------------------------------
     "power_high" {
-        Write-Output "Performance-Optimierung wird ausgeführt ..."
+        Write-Output "Balanced-Performance-Optimierung wird ausgeführt ..."
         Write-Output ""
 
         try {
-            # Energiesparplan: Höchstleistung aktivieren (GUID 8c5e7fda-...)
-            $planGUID    = "8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c"
-            $powerPlans  = powercfg.exe /list
-            $planExists  = $powerPlans -match $planGUID
+            # Der integrierte Plan "Ausbalanciert" ist unter Windows 10 und 11
+            # vorhanden. Der Befehlsname power_high bleibt aus Kompatibilitätsgründen.
+            $planGUID = "381b4222-f694-41f0-9685-ff5bb260df2e"
 
-            if (-not $planExists) {
-                Write-Output "• Höchstleistungsplan nicht gefunden - Standardplan wird dupliziert ..."
-                powercfg -duplicatescheme "$planGUID" | Out-Null 2>$null
-            }
-
-            Write-Output "• Aktiviere Höchstleistungs-Energieplan ..."
-            # PreferredPlan in der Systemsteuerung setzen (optional, für UI)
+            Write-Output "• Aktiviere den Energieplan Ausbalanciert ..."
             Set-ItemProperty `
                 -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\explorer\ControlPanel\NameSpace\{025A5937-A6BE-4686-A844-36FE4BEC8B6D}' `
                 -Name PreferredPlan `
@@ -672,90 +665,94 @@ Mainboard
 
             powercfg -setactive $planGUID | Out-Null
 
-            # Ruhezustand deaktivieren
-            Write-Output "• Deaktiviere Ruhezustand ..."
+            # Deaktiviert zugleich den Windows-Schnellstart.
+            Write-Output "• Deaktiviere Ruhezustand und Schnellstart ..."
             powercfg -hibernate off | Out-Null
 
-            # Mindest-CPU-Zustand
-            Write-Output "• Optimiere Mindest-CPU-Zustand [AC: 50% | DC: 5%] ..."
-            # Subgroup: Prozessorenergieverwaltung
-            # Setting: Mindestprozessorzustand
-            $subProcessor = "54533251-82be-4824-96c1-47b60b740d00"
-            $setMinProc   = "893dee8e-2bef-41e0-89c6-b55d0929964c"
-            powercfg -SETACVALUEINDEX SCHEME_CURRENT $subProcessor $setMinProc 5 | Out-Null
-            powercfg -SETDCVALUEINDEX SCHEME_CURRENT $subProcessor $setMinProc 5  | Out-Null
+            $subProcessor                  = "54533251-82be-4824-96c1-47b60b740d00"
+            $setMinProc                    = "893dee8e-2bef-41e0-89c6-b55d0929964c"
+            $setMaxProc                    = "bc5038f7-23e0-4960-96da-33abaf5935ec"
+            $setCoreParking                = "0cc5b647-c1df-4637-891a-dec35c318583"
+            $setPerfEpp                    = "36687f9e-e3a5-4dbf-b1dc-15eb381c6863"
+            $setPerfEpp1                   = "36687f9e-e3a5-4dbf-b1dc-15eb381c6864"
+            $setCoreParkingDecreaseTime    = "dfd10d17-d5eb-45dd-877a-9a34ddd15c82"
 
-            # Core Parking
-            Write-Output "• Optimiere Core Parking [AC: 100% | DC: 50%] ..."
-            # Setting: Prozessor-Leerlaufzustand - Minimaler Prozessorzustand für Core-Parking
-            $setCoreParking = "0cc5b647-c1df-4637-891a-dec35c318583"
-            powercfg -SETACVALUEINDEX SCHEME_CURRENT $subProcessor $setCoreParking 50 | Out-Null
-            powercfg -SETDCVALUEINDEX SCHEME_CURRENT $subProcessor $setCoreParking 30  | Out-Null
+            Write-Output "• Setze CPU-Leistungsbereich [AC/DC: 5–100 %] ..."
+            powercfg -setacvalueindex SCHEME_CURRENT $subProcessor $setMinProc 5 | Out-Null
+            powercfg -setdcvalueindex SCHEME_CURRENT $subProcessor $setMinProc 5 | Out-Null
+            powercfg -setacvalueindex SCHEME_CURRENT $subProcessor $setMaxProc 100 | Out-Null
+            powercfg -setdcvalueindex SCHEME_CURRENT $subProcessor $setMaxProc 100 | Out-Null
 
-            # Processor Performance Decrease Time
-            Write-Output "• Optimiere CPU Decrease Time [AC: 1500ms | DC: 750ms] ..."
-            $setDecreaseTime = "4d2b0152-7d5c-498b-88e2-34345392a2c5"
-            powercfg -SETACVALUEINDEX SCHEME_CURRENT $subProcessor $setDecreaseTime 1500 | Out-Null
-            powercfg -SETDCVALUEINDEX SCHEME_CURRENT $subProcessor $setDecreaseTime 750  | Out-Null
+            # CPMinCores bezeichnet den Mindestanteil ungeparkter logischer Prozessoren.
+            # AC 50 % = maximal 50 % parkbar; DC 30 % = maximal 70 % parkbar.
+            Write-Output "• Optimiere Core Parking [AC: max. 50 % | DC: max. 70 % parkbar] ..."
+            powercfg -setacvalueindex SCHEME_CURRENT $subProcessor $setCoreParking 50 | Out-Null
+            powercfg -setdcvalueindex SCHEME_CURRENT $subProcessor $setCoreParking 30 | Out-Null
 
-            # Processor Performance Decrease Threshold
-            Write-Output "• Optimiere CPU Decrease Threshold [AC: 20% | DC: 20%] ..."
-            $setDecreaseThreshold = "12a0ab44-fe28-4fa9-b3bd-4b64f44960a6"
-            powercfg -SETACVALUEINDEX SCHEME_CURRENT $subProcessor $setDecreaseThreshold 20 | Out-Null
-            powercfg -SETDCVALUEINDEX SCHEME_CURRENT $subProcessor $setDecreaseThreshold 20 | Out-Null
+            Write-Output "• Optimiere Performance-Präferenz [AC: 18/20 | DC: 50/50] ..."
+            powercfg -setacvalueindex SCHEME_CURRENT $subProcessor $setPerfEpp 18 | Out-Null
+            powercfg -setdcvalueindex SCHEME_CURRENT $subProcessor $setPerfEpp 50 | Out-Null
+            powercfg -setacvalueindex SCHEME_CURRENT $subProcessor $setPerfEpp1 20 | Out-Null
+            powercfg -setdcvalueindex SCHEME_CURRENT $subProcessor $setPerfEpp1 50 | Out-Null
 
-            # Processor Performance Increase Time
-            Write-Output "• Optimiere CPU Increase Time [AC: 200ms | DC: 200ms] ..."
-            $setIncreaseTime = "984cf492-3bed-4488-a8f9-4286f832755"
-            powercfg -SETACVALUEINDEX SCHEME_CURRENT $subProcessor $setIncreaseTime 200 | Out-Null
-            powercfg -SETDCVALUEINDEX SCHEME_CURRENT $subProcessor $setIncreaseTime 200 | Out-Null
+            # Kerne am Netz nach Last etwas länger verfügbar halten; im Akku
+            # bleibt die kürzere Balanced-Reaktionszeit erhalten.
+            Write-Output "• Optimiere Core-Parking-Abklingzeit [AC: 15 | DC: 10 Prüfintervalle] ..."
+            powercfg -setacvalueindex SCHEME_CURRENT $subProcessor $setCoreParkingDecreaseTime 15 | Out-Null
+            powercfg -setdcvalueindex SCHEME_CURRENT $subProcessor $setCoreParkingDecreaseTime 10 | Out-Null
 
-            # Festplatten-Timeout
-            Write-Output "• Optimiere Festplatten-Timeout [AC: 0 Minuten | DC: 15 Minuten] ..."
-            powercfg -change -disk-timeout-ac 0  | Out-Null
-            powercfg -change -disk-timeout-dc 15 | Out-Null
+            # Keine manuellen Performance-State-Increase-/Decrease-Timer:
+            # Moderne HWP/CPPC-CPUs regeln autonom, ältere CPUs nutzen Windows-Defaults.
 
-            # USB selektiver Energiesparmodus
+            Write-Output "• Optimiere Festplatten-Timeout [AC: Nie | DC: 10 Minuten] ..."
+            powercfg -change -disk-timeout-ac 0 | Out-Null
+            powercfg -change -disk-timeout-dc 10 | Out-Null
+
             Write-Output "• Optimiere USB-Selektivmodus [AC: Aus | DC: Ein] ..."
             $subUsb    = "2a737441-1930-4402-8d77-b2bebba308a3"
             $setUsbSel = "48e6b7a6-50f5-4782-a5d4-53bb8f07e226"
-            powercfg -SETACVALUEINDEX SCHEME_CURRENT $subUsb $setUsbSel 0 | Out-Null  # aus
-            powercfg -SETDCVALUEINDEX SCHEME_CURRENT $subUsb $setUsbSel 1 | Out-Null  # ein
+            powercfg -setacvalueindex SCHEME_CURRENT $subUsb $setUsbSel 0 | Out-Null
+            powercfg -setdcvalueindex SCHEME_CURRENT $subUsb $setUsbSel 1 | Out-Null
 
-            # Monitor- und Standby-Timeout
-            Write-Output "• Optimiere Monitor/Standby-Timeout [AC: 0 Min | DC: 10 Min (Monitor)] ..."
-            powercfg -change -standby-timeout-ac 0  | Out-Null
-            powercfg -change -standby-timeout-dc 0  | Out-Null
-            powercfg -change -monitor-timeout-ac 0  | Out-Null
+            Write-Output "• Optimiere Anzeige/Standby [AC: Nie | DC: 10/20 Minuten] ..."
+            powercfg -change -monitor-timeout-ac 0 | Out-Null
             powercfg -change -monitor-timeout-dc 10 | Out-Null
+            powercfg -change -standby-timeout-ac 0 | Out-Null
+            powercfg -change -standby-timeout-dc 20 | Out-Null
 
-            # Tasten-/Deckel-Aktionen (sub_buttons)
-            $subButtons = "sub_buttons"
-
-            Write-Output "• Optimiere Aktion beim Schließen des Notebook-Deckels [AC/DC: Nichts tun] ..."
-            $lidAction = "5ca83367-6e45-459f-a27b-476b1d01c936"
-            powercfg -setdcvalueindex scheme_current $subButtons $lidAction 0 | Out-Null
-            powercfg -setacvalueindex scheme_current $subButtons $lidAction 0 | Out-Null
-
-            Write-Output "• Optimiere Schlaftaste [AC/DC: Nichts tun] ..."
+            $subButtons  = "4f971e89-eebd-4455-a8de-9e59040e7347"
+            $lidAction   = "5ca83367-6e45-459f-a27b-476b1d01c936"
             $sleepAction = "96996bc0-ad50-47ec-923b-6f41874dd9eb"
-            powercfg -setdcvalueindex scheme_current $subButtons $sleepAction 0 | Out-Null
-            powercfg -setacvalueindex scheme_current $subButtons $sleepAction 0 | Out-Null
-
-            Write-Output "• Optimiere Ein-/Ausschalter [AC/DC: Herunterfahren] ..."
             $powerButton = "7648efa3-dd9c-4e3e-b566-50f929386280"
-            powercfg -setdcvalueindex scheme_current $subButtons $powerButton 3 | Out-Null
-            powercfg -setacvalueindex scheme_current $subButtons $powerButton 3 | Out-Null
+            $startButton = "a7066653-8d6c-40a8-910e-a1f54b84c7e5"
 
-            # Optionale weitere Tasten-/UI-Anpassung wie im Original
-            $extraButtons = "a7066653-8d6c-40a8-910e-a1f54b84c7e5"
-            powercfg -setdcvalueindex scheme_current $subButtons $extraButtons 2 | Out-Null
-            powercfg -setacvalueindex scheme_current $subButtons $extraButtons 2 | Out-Null
+            Write-Output "• Setze Notebook-Deckel [AC/DC: Standby] ..."
+            powercfg -setacvalueindex SCHEME_CURRENT $subButtons $lidAction 1 | Out-Null
+            powercfg -setdcvalueindex SCHEME_CURRENT $subButtons $lidAction 1 | Out-Null
 
-            # Aktuellen Plan mit allen Änderungen aktiv setzen
-            powercfg /setactive SCHEME_CURRENT | Out-Null
+            Write-Output "• Setze Schlaftaste [AC/DC: Nichts tun] ..."
+            powercfg -setacvalueindex SCHEME_CURRENT $subButtons $sleepAction 0 | Out-Null
+            powercfg -setdcvalueindex SCHEME_CURRENT $subButtons $sleepAction 0 | Out-Null
 
-            # Hintergrund-Apps deaktivieren (wie im Originalscript)
+            Write-Output "• Setze Ein-/Ausschalter [AC/DC: Herunterfahren] ..."
+            powercfg -setacvalueindex SCHEME_CURRENT $subButtons $powerButton 3 | Out-Null
+            powercfg -setdcvalueindex SCHEME_CURRENT $subButtons $powerButton 3 | Out-Null
+
+            Write-Output "• Setze Startmenü-Netzschalter [AC/DC: Herunterfahren] ..."
+            powercfg -setacvalueindex SCHEME_CURRENT $subButtons $startButton 2 | Out-Null
+            powercfg -setdcvalueindex SCHEME_CURRENT $subButtons $startButton 2 | Out-Null
+
+            # Bei deaktiviertem Ruhezustand verhindert Herunterfahren einen
+            # Sitzungsverlust, wenn der Akku nach Standby vollständig leer wird.
+            Write-Output "• Setze kritische Akkuaktion [AC/DC: Herunterfahren] ..."
+            $subBattery            = "e73a048d-bf27-4f12-9731-8b2076e8891f"
+            $criticalBatteryAction = "637ea02f-bbcb-4015-8e2c-a1c7b9c0b546"
+            powercfg -setacvalueindex SCHEME_CURRENT $subBattery $criticalBatteryAction 3 | Out-Null
+            powercfg -setdcvalueindex SCHEME_CURRENT $subBattery $criticalBatteryAction 3 | Out-Null
+
+            # Übernimmt alle gerade geschriebenen Werte unmittelbar.
+            powercfg -setactive $planGUID | Out-Null
+
             Write-Output "• Deaktiviere Hintergrundzugriff für ausgewählte Apps ..."
             $apps = @(
                 "Microsoft.MicrosoftEdge.Stable_8wekyb3d8bbwe",
@@ -792,21 +789,21 @@ Mainboard
 
             foreach ($app in $apps) {
                 $path = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications\$app"
-                if (!(Test-Path $path)) {
+                if (-not (Test-Path -LiteralPath $path)) {
                     New-Item -Path $path -Force | Out-Null
                 }
-                Set-ItemProperty -Path $path -Name "Disabled"      -Value 1 -Type DWord
+                Set-ItemProperty -Path $path -Name "Disabled" -Value 1 -Type DWord
                 Set-ItemProperty -Path $path -Name "DisabledByUser" -Value 1 -Type DWord
             }
 
             Write-Output ""
-            Write-Output "Performance-Optimierung abgeschlossen."
-            Write-Output "Hinweis: Einige Einstellungen (Tasten/Deckel) wirken sich v. a. auf Notebooks aus."
+            Write-Output "Balanced-Performance-Optimierung abgeschlossen."
+            Write-Output "Hinweis: Akku-, Deckel- und einige Tastenwerte wirken nur auf unterstützter Hardware."
             exit 0
         }
         catch {
             Write-Output ""
-            Write-Output "FEHLER bei der Performance-Optimierung:"
+            Write-Output "FEHLER bei der Balanced-Performance-Optimierung:"
             Write-Output $_.Exception.Message
             exit 1
         }
@@ -818,7 +815,7 @@ Mainboard
         Write-Output "Akkuzustand wird analysiert ..."
         Write-Output ""
 
-        if ($true) {
+        try {
             $batteries = Get-CimInstance -ClassName Win32_Battery -ErrorAction SilentlyContinue
             if (-not $batteries) {
                 Write-ToolStatus "INFO" "Kein Akku erkannt - Akkudiagnose wurde übersprungen."
@@ -834,7 +831,14 @@ Mainboard
             Write-Output "Erstelle Windows-Batteriereport ..."
             Write-Output "  Ziel: $reportPath"
             Write-Output ""
-            $null = powercfg /batteryreport /output "$reportPath" /format HTML 2>$null
+            $batteryReportOutput = @(powercfg.exe /batteryreport /output "$reportPath" 2>&1)
+            $batteryReportExitCode = $LASTEXITCODE
+            $batteryReportCreated = ($batteryReportExitCode -eq 0 -and (Test-Path -LiteralPath $reportPath -PathType Leaf))
+            if (-not $batteryReportCreated) {
+                Write-ToolStatus "WARNUNG" ("Windows-Batteriereport konnte nicht erstellt werden (Fehlercode {0})." -f $batteryReportExitCode)
+                $batteryReportOutput | Where-Object { $_ } | ForEach-Object { Write-Output ("  {0}" -f $_) }
+                Write-Output ""
+            }
 
             $staticItems = @(Get-WmiObject -Class "BatteryStaticData" -Namespace "ROOT\WMI" -ErrorAction SilentlyContinue)
             $fullItems   = @(Get-WmiObject -Class "BatteryFullChargedCapacity" -Namespace "ROOT\WMI" -ErrorAction SilentlyContinue)
@@ -882,9 +886,14 @@ Mainboard
             }
 
             Write-Output "Hinweis: Akkudaten werden vom Gerät bzw. Hersteller bereitgestellt und können unvollständig sein."
-            Write-Output "Der vollständige Windows-Batteriereport wurde gespeichert:"
-            Write-Output "  $reportPath"
-            exit 0
+            if ($batteryReportCreated) {
+                Write-Output "Der vollständige Windows-Batteriereport wurde gespeichert:"
+                Write-Output "  $reportPath"
+                exit 0
+            }
+
+            Write-ToolStatus "FEHLER" "Akkudaten wurden erkannt, aber der Windows-Batteriereport wurde nicht erstellt."
+            exit 1
         }
         catch {
             Write-ToolStatus "FEHLER" "Akkuzustand konnte nicht ermittelt werden."
