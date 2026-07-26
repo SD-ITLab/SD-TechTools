@@ -4,7 +4,7 @@
 
 # 🛠️ SD TechTools - Windows Repair Toolbox
 
-**Version 5.0.0**
+**Version 5.5.0**
 
 SD TechTools ist ein Diagnose-, Wartungs- und Reparaturtool für Windows-Systeme.  
 Es wurde für den Werkstatt- und Serviceeinsatz entwickelt und bündelt häufig benötigte Windows-Prüfungen in einer modernen Python-Oberfläche.
@@ -132,14 +132,14 @@ Der Bericht enthält:
 
 ### ⚡ Leistung / Tuning
 
-- Windows-Höchstleistungsmodus aktivieren (Feintuned)
+- angepasstes Balanced-Performance-Profil für schnelle Reaktion und Energieeffizienz aktivieren
 - Windows Home auf Windows Pro vorbereiten
 
 ### 🔍 Info & Tools
 
 - ausführliche Systeminformationen
 - BitLocker-Status anzeigen / BitLocker auf C: deaktivieren
-- Akkuinformationen und Windows-Batteriereport
+- Akkuinformationen und geprüften Windows-Batteriereport erstellen
 - Drucker-Testseite auslösen
 - Diagnosebericht erstellen
 
@@ -205,6 +205,13 @@ Das Tool nutzt überwiegend Windows-Bordmittel:
 
 ## Versionshistorie
 
+### Version 5.5.0
+
+- Leistungstuning von Höchstleistung auf ein angepasstes Balanced-Performance-Profil umgestellt
+- CPU-Reaktionsverhalten, Energy Performance Preference und Core Parking für AC/DC optimiert
+- Bildschirm-, Standby-, Deckel- und Powerbutton-Verhalten für PCs und Notebooks überarbeitet
+- Windows-Batteriereport korrigiert und Rückgabecode sowie erzeugte HTML-Datei werden geprüft
+
 ### Version 5.0.0
 
 - Umbenennung und Projektumbau von **WinRep** zu **TechTools**
@@ -266,7 +273,7 @@ Dieses Tool wurde für den Werkstatt- und Serviceeinsatz entwickelt und kann fre
 
 # SD TechTools - Windows Repair Toolbox
 
-**Version 5.0.0**
+**Version 5.5.0**
 
 SD TechTools is a Windows diagnostics, maintenance and repair toolbox designed for workshop and service environments.
 
@@ -282,6 +289,13 @@ The application uses a Python GUI while the diagnostic and repair actions are ex
 - compact TXT diagnostic report for first analysis
 - critical event and reliability history summary
 - active startup entry and service diagnostics
+
+## Version 5.5.0 Highlights
+
+- performance tuning changed from High Performance to a customized Balanced Performance profile
+- optimized CPU responsiveness, Energy Performance Preference and core parking for AC/DC operation
+- revised display, standby, lid and power-button behavior for desktops and notebooks
+- fixed Windows battery-report generation and added exit-code and output-file validation
 
 ## Version 5.0.0 Highlights
 
