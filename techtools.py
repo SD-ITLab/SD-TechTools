@@ -142,8 +142,8 @@ ACTIONS: Dict[str, TechToolsAction] = {
     ),
     "power_high": TechToolsAction(
         "power_high",
-        "Windows Höchstleistungsmodus aktivieren",
-        "Aktiviert den Windows-Höchstleistungsmodus, sofern verfügbar.",
+        "Windows-Energieprofil optimieren",
+        "Aktiviert den Energieplan Ausbalanciert und optimiert Leistung, Reaktionszeit und Energieeffizienz.",
         "Leistung / Tuning",
     ),
     "sysinfo": TechToolsAction(
@@ -802,7 +802,7 @@ class TechToolsApp(ctk.CTk):
             return
 
         try:
-            logo_path = resource_path("logo.png")
+            logo_path = resource_path("logo1.png")
             img = Image.open(logo_path).convert("RGBA")
         except Exception:
             # Fallback, wenn logo.png fehlt oder erneut etwas mit Pillow schiefgeht
